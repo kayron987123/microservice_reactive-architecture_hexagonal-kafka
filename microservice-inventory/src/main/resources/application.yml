@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: microservice-inventory
+  webflux:
+    base-path: /api/v1 # Prefijo común para todas las rutas del API
+
+  r2dbc:
+    pool:
+      enabled: true
+      initial-size: 5         # Menos conexiones al iniciar
+      max-size: 15            # Límite máximo más bajo (suficiente para desarrollo)
+      max-life-time: 300000ms # 5 minutos: se reciclan conexiones viejas
+      max-idle-time: 60000ms  # 1 minuto de inactividad antes de cerrar
+      max-create-connection-time: 5000ms  # 5 segundos máximo para crear una conexión
+      validation-query: SELECT 1 # Consulta simple para validar conexiones
+      validation-depth: local # Validación local para mejor rendimiento
+    url: r2dbc:postgresql://localhost:5433/inventories_db
+    username: gad
+    password: 123456
+
+# Logging para observar comportamiento interno en desarrollo
+logging:
+  level:
+    root: INFO                 # Nivel general de logging
+    io:
+      r2dbc:
+        pool: DEBUG            # Muestra creación y cierre de conexiones
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG         # Muestra las consultas SQL reactivas
+        transaction: DEBUG     # Muestra inicios/commits de transacciones
+server:
+  port: 8081

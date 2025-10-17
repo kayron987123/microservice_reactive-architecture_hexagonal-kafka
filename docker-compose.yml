@@ -1,0 +1,74 @@
+services:
+  postgres-catalog:
+    container_name: microservice_catalog
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gad
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=catalogs_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./microservice-catalog/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data_catalog:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  postgres-inventory:
+    container_name: microservice_inventory
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gad
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=inventories_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./microservice-inventory/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data_inventory:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  postgres-order:
+    container_name: microservice_order
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gad
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=orders_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./microservice-order/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data_order:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  postgres-payment:
+    container_name: microservice_payment
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gad
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=payments_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./microservice-payment/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data_payment:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+volumes:
+  postgres_data_catalog:
+  postgres_data_inventory:
+  postgres_data_order:
+  postgres_data_payment:
+
+networks:
+  microservices-network:
+    driver: bridge
