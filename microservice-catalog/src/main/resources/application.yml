@@ -2,18 +2,18 @@ spring:
   application:
     name: microservice-catalog
   webflux:
-    base-path: /api/v1 # Prefijo común para todas las rutas del API
+    base-path: /api/v1 # Prefijo comï¿½n para todas las rutas del API
 
   r2dbc:
     pool:
       enabled: true
       initial-size: 5         # Menos conexiones al iniciar
-      max-size: 15            # Límite máximo más bajo (suficiente para desarrollo)
+      max-size: 15            # Lï¿½mite mï¿½ximo mï¿½s bajo (suficiente para desarrollo)
       max-life-time: 300000ms # 5 minutos: se reciclan conexiones viejas
       max-idle-time: 60000ms  # 1 minuto de inactividad antes de cerrar
-      max-create-connection-time: 5000ms  # 5 segundos máximo para crear una conexión
+      max-create-connection-time: 5000ms  # 5 segundos mï¿½ximo para crear una conexiï¿½n
       validation-query: SELECT 1 # Consulta simple para validar conexiones
-      validation-depth: local # Validación local para mejor rendimiento
+      validation-depth: local # Validaciï¿½n local para mejor rendimiento
     url: r2dbc:postgresql://localhost:5432/catalogs_db
     username: gad
     password: 123456
@@ -24,7 +24,7 @@ logging:
     root: INFO                 # Nivel general de logging
     io:
       r2dbc:
-        pool: DEBUG            # Muestra creación y cierre de conexiones
+        pool: DEBUG            # Muestra creaciï¿½n y cierre de conexiones
     org:
       springframework:
         data:

@@ -13,7 +13,7 @@ services:
       - ./microservice-catalog/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data_catalog:/var/lib/postgresql/data
     networks:
-      - microservices_network
+      - microservices-network
 
   postgres-inventory:
     container_name: microservice_inventory
@@ -29,7 +29,7 @@ services:
       - ./microservice-inventory/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data_inventory:/var/lib/postgresql/data
     networks:
-      - microservices_network
+      - microservices-network
 
   postgres-order:
     container_name: microservice_order
@@ -45,7 +45,7 @@ services:
       - ./microservice-order/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data_order:/var/lib/postgresql/data
     networks:
-      - microservices_network
+      - microservices-network
 
   postgres-payment:
     container_name: microservice_payment
@@ -61,7 +61,7 @@ services:
       - ./microservice-payment/docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data_payment:/var/lib/postgresql/data
     networks:
-      - microservices_network
+      - microservices-network
 
 volumes:
   postgres_data_catalog:

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
+    customer_id BIGINT NOT NULL,
     total_amount DECIMAL(10,2) NOT NULL,
     status VARCHAR(20) DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
