@@ -3,6 +3,8 @@ package com.gad.microservice.catalog.infrastructure.adapter.out.persistence;
 import com.gad.microservice.catalog.application.port.out.ProductPersistencePort;
 import com.gad.microservice.catalog.domain.exception.ProductNotFoundException;
 import com.gad.microservice.catalog.domain.model.Product;
+import com.gad.microservice.catalog.infrastructure.adapter.in.rest.model.response.PagedResponse;
+import com.gad.microservice.catalog.infrastructure.adapter.out.persistence.entity.ProductEntity;
 import com.gad.microservice.catalog.infrastructure.adapter.out.persistence.mapper.ProductMapper;
 import com.gad.microservice.catalog.infrastructure.adapter.out.persistence.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Comparator;
 
 @Slf4j
 @Component
@@ -28,13 +32,26 @@ public class ProductPersistenceAdapter implements ProductPersistencePort {
     }
 
     @Override
-    public Flux<Product> findAll(Integer page, Integer size) {
-        return productRepository.findAll()
+    public Mono<PagedResponse<Product>> findAll(Integer page, Integer size, String sortField, String sortDirection) {
+        Comparator<ProductEntity> comparator = getComparator(sortField, sortDirection);
+
+        Mono<Long> totalCount = productRepository.count();
+
+        Flux<Product> products = productRepository.findAll()
+                .sort(comparator)
                 .skip((long) page * size)
                 .take(size)
-                .transform(productMapper::toProductFlux)
-                .doOnNext(product -> log.info("Product found with id: {}", product.getId()))
-                .doOnError(error -> log.error("Error findinf products", error));
+                .transform(productMapper::toProductFlux);
+
+        return totalCount.flatMap(total ->
+                products.collectList()
+                        .map(list -> PagedResponse.<Product>builder()
+                                .page(page)
+                                .size(size)
+                                .totalElements(total)
+                                .data(list)
+                                .build())
+        );
     }
 
     @Override
@@ -61,5 +78,26 @@ public class ProductPersistenceAdapter implements ProductPersistencePort {
                 .transform(productMapper::toProductFlux)
                 .doOnNext(product -> log.info("Product found with name: {} and category: {}", product.getName(), category))
                 .doOnError(error -> log.error("Error when finding products by name: {} and category: {}", name, category, error));
+    }
+
+    private Comparator<ProductEntity> getComparator(String sortField, String sortDirection) {
+        Comparator<ProductEntity> comparator = switch (sortField.toLowerCase()) {
+            case "name" -> Comparator.comparing(ProductEntity::getName,
+                    Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+            case "price" -> Comparator.comparing(ProductEntity::getPrice,
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            case "category" -> Comparator.comparing(ProductEntity::getCategory,
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            case "description" -> Comparator.comparing(ProductEntity::getDescription,
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            case "id" -> Comparator.comparing(ProductEntity::getId);
+            default -> throw new IllegalArgumentException("Invalid sort field: " + sortField);
+        };
+
+        return switch (sortDirection.toLowerCase()) {
+            case "desc", "descendente" -> comparator.reversed();
+            case "asc", "ascendente", "" -> comparator;
+            default -> throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
+        };
     }
 }

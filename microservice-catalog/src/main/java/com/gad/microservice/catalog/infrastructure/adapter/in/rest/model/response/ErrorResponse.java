@@ -3,10 +3,11 @@ package com.gad.microservice.catalog.infrastructure.adapter.in.rest.model.respon
 import lombok.Builder;
 
 @Builder
-public record DataResponse<T>(
+public record ErrorResponse(
         int status,
         String message,
-        T data,
-        String timestamp
+        Object errors,
+        String timestamp,
+        String path
 ) {
 }

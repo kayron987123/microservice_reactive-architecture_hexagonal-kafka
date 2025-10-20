@@ -24,9 +24,5 @@ public interface ProductMapper {
    default Mono<ProductEntity> toEntityMono(Mono<Product> product) {
        return product.map(this::toEntity);
    }
-
-   default Flux<ProductEntity> toEntityFlux(Flux<Product> products) {
-       return products.map(this::toEntity);
-   }
 }
 

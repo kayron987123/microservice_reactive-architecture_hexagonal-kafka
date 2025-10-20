@@ -4,6 +4,7 @@ import com.gad.microservice.catalog.application.port.in.GetProductUseCase;
 import com.gad.microservice.catalog.application.port.out.ProductPersistencePort;
 import com.gad.microservice.catalog.domain.exception.ProductNotFoundException;
 import com.gad.microservice.catalog.domain.model.Product;
+import com.gad.microservice.catalog.infrastructure.adapter.in.rest.model.response.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -15,10 +16,10 @@ public class GetProductService implements GetProductUseCase {
     private final ProductPersistencePort persistencePort;
 
     @Override
-    public Flux<Product> getAllProducts(Integer page, Integer size) {
-        return persistencePort.findAll(page, size)
-                .doOnComplete(() -> log.info("Completed reading all products"))
-                .doOnError(error -> log.error("Error reading all products", error));
+    public Mono<PagedResponse<Product>> getAllProducts(Integer page, Integer size, String sortField, String sortDirection) {
+        return persistencePort.findAll(page, size, sortField, sortDirection)
+                .doOnSuccess(product -> log.info("Product: {}", product))
+                .doOnError(error -> log.error(error.getMessage(), error));
     }
 
     @Override
