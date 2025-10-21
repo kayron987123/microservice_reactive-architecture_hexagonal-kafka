@@ -7,18 +7,29 @@ import com.gad.microservice.catalog.domain.model.Product;
 import com.gad.microservice.catalog.infrastructure.adapter.in.rest.model.response.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class GetProductService implements GetProductUseCase {
     private final ProductPersistencePort persistencePort;
 
     @Override
     public Mono<PagedResponse<Product>> getAllProducts(Integer page, Integer size, String sortField, String sortDirection) {
-        return persistencePort.findAll(page, size, sortField, sortDirection)
-                .doOnSuccess(product -> log.info("Product: {}", product))
+        Flux<Product> productsFlux = persistencePort.findAll(page, size, sortField, sortDirection);
+        Mono<Long> totalCountMono = persistencePort.countAll();
+
+        return Mono.zip(productsFlux.collectList(), totalCountMono)
+                .map(tuple -> PagedResponse.<Product>builder()
+                        .page(page)
+                        .size(size)
+                        .totalElements(tuple.getT2())
+                        .data(tuple.getT1())
+                        .build())
+                .doOnSuccess(pagedResponse -> log.info("PagedResponse: {}", pagedResponse))
                 .doOnError(error -> log.error(error.getMessage(), error));
     }
 

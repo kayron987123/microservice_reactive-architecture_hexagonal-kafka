@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 
 @Slf4j
@@ -32,26 +33,19 @@ public class ProductPersistenceAdapter implements ProductPersistencePort {
     }
 
     @Override
-    public Mono<PagedResponse<Product>> findAll(Integer page, Integer size, String sortField, String sortDirection) {
+    public Flux<Product> findAll(Integer page, Integer size, String sortField, String sortDirection) {
         Comparator<ProductEntity> comparator = getComparator(sortField, sortDirection);
 
-        Mono<Long> totalCount = productRepository.count();
-
-        Flux<Product> products = productRepository.findAll()
+        return productRepository.findAll()
                 .sort(comparator)
                 .skip((long) page * size)
                 .take(size)
                 .transform(productMapper::toProductFlux);
+    }
 
-        return totalCount.flatMap(total ->
-                products.collectList()
-                        .map(list -> PagedResponse.<Product>builder()
-                                .page(page)
-                                .size(size)
-                                .totalElements(total)
-                                .data(list)
-                                .build())
-        );
+    @Override
+    public Mono<Long> countAll() {
+        return productRepository.count();
     }
 
     @Override
@@ -78,6 +72,23 @@ public class ProductPersistenceAdapter implements ProductPersistencePort {
                 .transform(productMapper::toProductFlux)
                 .doOnNext(product -> log.info("Product found with name: {} and category: {}", product.getName(), category))
                 .doOnError(error -> log.error("Error when finding products by name: {} and category: {}", name, category, error));
+    }
+
+    @Override
+    public Mono<Product> update(Long id, Product product) {
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ProductNotFoundException("Product not found with id: " + id)))
+                .flatMap(productExisting -> {
+                    productExisting.setName(product.getName());
+                    productExisting.setDescription(product.getDescription());
+                    productExisting.setPrice(product.getPrice());
+                    productExisting.setCategory(product.getCategory());
+                    productExisting.setUpdatedAt(LocalDateTime.now());
+                    return productRepository.save(productExisting);
+                })
+                .transform(productMapper::toProductMono)
+                .doOnSuccess(prod -> log.info("Product updated with id: {}", id))
+                .doOnError(error -> log.error("Error updating product with id: {}", id, error));
     }
 
     private Comparator<ProductEntity> getComparator(String sortField, String sortDirection) {
