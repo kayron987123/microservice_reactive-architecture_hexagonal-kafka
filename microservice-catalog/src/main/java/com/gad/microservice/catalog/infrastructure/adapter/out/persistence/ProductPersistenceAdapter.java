@@ -3,7 +3,6 @@ package com.gad.microservice.catalog.infrastructure.adapter.out.persistence;
 import com.gad.microservice.catalog.application.port.out.ProductPersistencePort;
 import com.gad.microservice.catalog.domain.exception.ProductNotFoundException;
 import com.gad.microservice.catalog.domain.model.Product;
-import com.gad.microservice.catalog.infrastructure.adapter.in.rest.model.response.PagedResponse;
 import com.gad.microservice.catalog.infrastructure.adapter.out.persistence.entity.ProductEntity;
 import com.gad.microservice.catalog.infrastructure.adapter.out.persistence.mapper.ProductMapper;
 import com.gad.microservice.catalog.infrastructure.adapter.out.persistence.repository.ProductRepository;

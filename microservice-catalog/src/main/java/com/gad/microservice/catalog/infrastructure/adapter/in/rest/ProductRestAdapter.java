@@ -119,7 +119,7 @@ public class ProductRestAdapter {
                                                                         @RequestBody @Valid ProductRequest request,
                                                                         ServerWebExchange serverRequest) {
         return updateProductUseCase.updateProductById(id, mapper.toModel(request))
-                .map(mapper::toResponse)
+                .transform(mapper::toMonoDTO)
                 .map(productDto -> {
                     URI location = UriComponentsBuilder
                             .fromUri(serverRequest.getRequest().getURI())

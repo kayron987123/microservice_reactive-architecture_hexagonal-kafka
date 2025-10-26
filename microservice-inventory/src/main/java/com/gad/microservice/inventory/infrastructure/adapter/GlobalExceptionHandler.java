@@ -1,8 +1,8 @@
-package com.gad.microservice.catalog.infrastructure.adapter;
+package com.gad.microservice.inventory.infrastructure.adapter;
 
-import com.gad.microservice.catalog.domain.exception.ProductNotFoundException;
-import com.gad.microservice.catalog.infrastructure.adapter.in.rest.model.response.ErrorResponse;
-import com.gad.microservice.catalog.utils.MethodsUtils;
+import com.gad.microservice.inventory.domain.exception.InventoryNotFoundException;
+import com.gad.microservice.inventory.infrastructure.adapter.in.rest.model.response.ErrorResponse;
+import com.gad.microservice.inventory.utils.MethodsUtils;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +45,8 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exchange, HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    public Mono<ResponseEntity<ErrorResponse>> handleProductNotFoundException(ProductNotFoundException ex, ServerWebExchange exchange) {
+    @ExceptionHandler(InventoryNotFoundException.class)
+    public Mono<ResponseEntity<ErrorResponse>> handleProductNotFoundException(InventoryNotFoundException ex, ServerWebExchange exchange) {
         return buildErrorResponse(exchange, HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 
